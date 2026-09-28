@@ -1,0 +1,34 @@
+name: Build and Release .exe
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Windows Executable
+        run: |
+          npm run build
+          npx electron-builder --win --publish never
+
+      - name: Upload Release to GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          files: 'dist-electron/*.exe'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
